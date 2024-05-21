@@ -1,5 +1,5 @@
 # Xpired
-Xpired is a machine learning project designed to help you keep track of the expiration dates of your food products. By using Optical Character Recognition (OCR) technology, Xpired captures images of expiration dates from food packaging, processes this information, and uploads it to a database. The application then sends reminders as products approach their expiration dates, ensuring that you consume your food items in a timely manner and reduce waste.
+Xpired is a machine learning project designed to help you keep track of the expiration dates of your food products. By using Optical Character Recognition (OCR) technology, Xpired captures images of expiration dates from food packaging, processes this information, and uploads it to a database. The application then sends reminders as products approach their expiration dates, ensuring that you consume your food items in a timely manner in hopes to reduce waste.
 
 # Features:
 - OCR for Expiration Dates: Utilizes an Optic Character Recognition model to scan expiration dates food product packaging.

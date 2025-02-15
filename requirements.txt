@@ -1,0 +1,4 @@
+Packages:
+- dotenv 1.01
+
+Python 3.11.5

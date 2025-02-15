@@ -24,5 +24,3 @@ Install dependencies:
 
 - pip install -r requirements.txt
 
-Ensure you have a PostgreSQL database set up.
-Configure your database connection settings in the config.py file.

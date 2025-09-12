@@ -43,3 +43,37 @@ Set up environment variables:
 
 - Copy .env.example to .env
 - Fill in the values for the environment variables
+
+## Database Setup
+
+Xpired uses a local SQLite database to manage your food inventory and expiration tracking. The database automatically handles:
+
+# TODO: investigate if we need this many tables or if we can just have a master table 
+### Core Functionality
+- **Food Item Storage**: Track products with names, brands, categories, and barcodes
+- **Expiration Management**: Monitor expiration dates with quantities and storage locations
+- **Smart Notifications**: Automatic alerts for items approaching expiration
+- **Recipe Integration**: Provides ingredient lists to the LLM for recipe suggestions
+- **OCR Results**: Stores text extraction results from food packaging images
+
+### Quick Start
+```python
+from db.db import initialize_database
+
+# Initialize database (creates xpired.db automatically)
+db = initialize_database()
+```
+
+### Database Schema
+The system uses five main tables:
+- **`food_items`** - Product information and metadata
+- **`expiration_dates`** - Expiration tracking with status management
+- **`notifications`** - Expiration alerts and reminders
+- **`ocr_results`** - YOLOv8 OCR processing results
+- **`user_preferences`** - System settings and user preferences
+
+### Integration Points
+- **OCR Pipeline**: Automatically stores YOLOv8 text extraction results
+- **LLM Service**: Provides ingredient lists for GPT-4o-mini recipe generation
+- **Notification System**: Triggers alerts based on expiration proximity
+- **Status Tracking**: Monitors food consumption to reduce waste

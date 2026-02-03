@@ -65,4 +65,4 @@ for digit_folder in os.listdir(image_dir):
         move_and_label(train_files, 'train')
         move_and_label(val_files, 'val')
 
-print("✅ Done! Images and YOLO labels generated for train/val split.")
+print("Images and YOLO labels generated for train/val split.")

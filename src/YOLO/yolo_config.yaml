@@ -1,0 +1,73 @@
+# YOLO11 Training Configuration for Expiration Date Detection
+
+# Dataset Configuration
+path: data/yolo_formatted  # Dataset root directory
+train: images/train          # Training images directory
+val_dir: images/val         # Validation images directory
+
+# Class Information
+nc: 3                      # Number of classes
+names: ['day', 'month', 'year']  # Class names
+
+# Model Configuration
+model: yolo11n.pt          # Model variant (nano - fastest, good for lightweight)
+# model: yolo11s.pt        # Small variant
+# model: yolo11l.pt        # Large variant
+# model: yolo11x.pt        # Extra large variant
+
+# Training Parameters
+epochs: 25                # Number of training epochs
+batch_size: 64             # Batch size (GPU optimized)
+imgsz: 640                 # Image size (square)
+lr0: 0.05                  # Initial learning rate
+lrf: 0.05                  # Final learning rate (lr0 * lrf)
+momentum: 0.937            # SGD momentum
+weight_decay: 0.0005       # Weight decay
+warmup_epochs: 3           # Warmup epochs
+warmup_momentum: 0.8       # Warmup initial momentum
+warmup_bias_lr: 0.1        # Warmup initial bias lr
+box: 7.5                   # Box loss gain
+cls: 0.5                   # Classification loss gain
+dfl: 1.5                   # Distribution focal loss gain
+
+# Data Augmentation
+hsv_h: 0.015               # Hue augmentation
+hsv_s: 0.7                 # Saturation augmentation
+hsv_v: 0.4                 # Value augmentation
+degrees: 0.0                # Rotation (+/- deg)
+translate: 0.1             # Translation (+/- fraction)
+scale: 0.5                 # Scale (+/- gain)
+shear: 0.0                 # Shear (+/- deg)
+perspective: 0.0           # Perspective (+/- fraction)
+flipud: 0.0                # Vertical flip probability
+fliplr: 0.5                # Horizontal flip probability
+mosaic: 1.0                # Mosaic augmentation probability
+mixup: 0.0                 # Mixup augmentation probability
+
+# Training Settings
+device: 0                  # Device to use (0 for GPU, cpu for CPU)
+workers: 16                 # Number of data loading workers
+project: runs/train        # Project directory
+name: exp                  # Experiment name
+exist_ok: True            # Whether to overwrite existing experiment
+save: False                 # Save training checkpoints
+save_period: 10            # Save checkpoint every x epochs (disabled if -1)
+cache: False                # Cache images in memory (faster training)
+auto_augment: None          # Auto augmentation policy
+amp: False                  # Automatic Mixed Precision
+
+# Validation Settings
+val: False                  # Run validation during training
+plots: False                # Save training plots
+rect: True                  # Rectangular training
+
+# Logging
+verbose: True              # Verbose logging
+seed: 42                   # Random seed for reproducibility
+deterministic: True        # Deterministic training
+
+# Early Stopping
+patience: 50               # Early stopping patience (epochs)
+
+# Export Settings
+export_format: onnx        # Export format (onnx, torchscript, coreml)

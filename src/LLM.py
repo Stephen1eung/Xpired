@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+from openai import OpenAI
 
 TEMPERATURE = 1
 MAX_TOKENS = 1000
@@ -50,17 +50,15 @@ ingredients = ['egg','rice']
 
 def generate_recipe(ingredients):
     try:
-        # Get and load config settings
+
         load_dotenv()
+        client = OpenAI(
+            base_url = os.getenv("OPENAI_ENDPOINT"),
+            api_key = os.getenv("OPENAI_KEY")
+        )
 
-        client = AzureOpenAI(
-                azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT"),
-                api_key = os.getenv("AZURE_OPENAI_KEY"),
-                api_version = "2024-02-01")
-
-        # Send request to Azure OpenAI model
         response = client.chat.completions.create(
-            model = os.getenv("AZURE_OPENAI_DEPLOYMENT"),
+            model = os.getenv("OPENAI_DEPLOYMENT_NAME"),
             temperature = TEMPERATURE,
             max_tokens = MAX_TOKENS,
             messages = [
@@ -68,6 +66,7 @@ def generate_recipe(ingredients):
                 {"role": "user", "content": user_prompt + str(ingredients)}
             ],
         )
+
         # Print response to console
         print("Output for: {}\n".format(ingredients) + response.choices[0].message.content + "\n")
         print("Prompt tokens: " + str(response.usage.prompt_tokens)  + "\n" +

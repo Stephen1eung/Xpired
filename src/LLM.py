@@ -1,3 +1,5 @@
+"""OpenAI recipe generation utilities."""
+
 import os
 
 from dotenv import load_dotenv
@@ -6,7 +8,7 @@ from openai import OpenAI
 TEMPERATURE = 1
 MAX_TOKENS = 1000
 
-user_prompt = """
+USER_PROMPT = """
 Based on the provided list of ingredients generate 1 recipe using only the ingredients on hand — the recipe should be practical, easy to follow, and make the most of the available items.
 Suggest recipe that require minimal additional ingredients — for each recipe, specify what extra ingredients are needed and why they improve the dish.
 
@@ -31,8 +33,7 @@ Dietary Restrictions: [List]
 Here is the list of ingredients: 
 """
 
-
-system_prompt = """
+SYSTEM_PROMPT = """
 You are a culinary assistant specialized in food optimization and waste reduction. Your primary role is to help users make the most of their available ingredients by generating practical, easy-to-follow recipes. 
 
 You must:
@@ -46,36 +47,41 @@ Input format:
 
 """
 
-ingredients = ['egg','rice']
+INGREDIENTS = ['egg', 'rice']
 
-def generate_recipe(ingredients):
+def generate_recipe(ingredients_list):
+    """Generate a recipe using the configured OpenAI chat model."""
     try:
-
         load_dotenv()
         client = OpenAI(
-            base_url = os.getenv("OPENAI_ENDPOINT"),
-            api_key = os.getenv("OPENAI_KEY")
+            base_url=os.getenv("OPENAI_ENDPOINT"),
+            api_key=os.getenv("OPENAI_KEY"),
         )
 
         response = client.chat.completions.create(
-            model = os.getenv("OPENAI_DEPLOYMENT_NAME"),
-            temperature = TEMPERATURE,
-            max_tokens = MAX_TOKENS,
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt + str(ingredients)}
+            model=os.getenv("OPENAI_DEPLOYMENT_NAME"),
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": USER_PROMPT + str(ingredients_list)},
             ],
         )
 
-        # Print response to console
-        print("Output for: {}\n".format(ingredients) + response.choices[0].message.content + "\n")
-        print("Prompt tokens: " + str(response.usage.prompt_tokens)  + "\n" +
-              "Completion tokens: " + str(response.usage.completion_tokens)  + "\n" +
-              "Total tokens: " + str(response.usage.total_tokens)  + "\n")
-
-    except Exception as ex:
+        output = response.choices[0].message.content
+        usage = response.usage
+        print(f"Output for: {ingredients_list}\n{output}\n")
+        print(
+            f"Prompt tokens: {usage.prompt_tokens}\n"
+            f"Completion tokens: {usage.completion_tokens}\n"
+            f"Total tokens: {usage.total_tokens}\n"
+        )
+        return output
+    except (OSError, ValueError) as ex:
         print("ERROR: FAILED TO ALLOCATE RESOURCES")
         print(ex)
+        return None
 
-print(generate_recipe(ingredients))
-#print(user_prompt + str(ingredients))
+
+if __name__ == "__main__":
+    generate_recipe(INGREDIENTS)

@@ -14,6 +14,7 @@ import yaml
 class YOLODataPreprocessor:
     """Convert JSON annotations to YOLO format and build train/val splits."""
     def __init__(self, data_dir: str, output_dir: str):
+        """Initialize the preprocessor with input and output directories."""
         self.data_dir = Path(data_dir)
         self.output_dir = Path(output_dir)
         self.images_dir = self.data_dir / "images"
@@ -32,6 +33,7 @@ class YOLODataPreprocessor:
 
     # Create necessary directory structure for YOLO training
     def create_output_directories(self):
+        """Create the output directory structure for YOLO training."""
         dirs = [
             self.output_dir / "images" / "train",
             self.output_dir / "images" / "val",
@@ -45,6 +47,7 @@ class YOLODataPreprocessor:
 
     # Load JSON annotations file
     def load_annotations(self) -> Dict:
+        """Load JSON annotations from disk."""
         with open(self.annotations_file, 'r', encoding='utf-8') as f:
             return json.load(f)
 
@@ -54,6 +57,7 @@ class YOLODataPreprocessor:
     def convert_bbox_to_yolo(
         self, bbox: List[int], img_width: int, img_height: int
     ) -> Tuple[float, float, float, float]:
+        """Convert a bounding box to normalized YOLO format."""
         x1, y1, x2, y2 = bbox
 
         # Calculate center coordinates and dimensions
@@ -73,6 +77,7 @@ class YOLODataPreprocessor:
     # Convert JSON annotations to YOLO format
     # Returns dictionary mapping image filenames to YOLO annotation strings
     def convert_annotations_to_yolo(self, annotations: Dict) -> Dict[str, List]:
+        """Convert JSON annotation dict into YOLO label strings."""
         yolo_annotations = {}
 
         for img_filename, img_data in annotations.items():
@@ -112,7 +117,7 @@ class YOLODataPreprocessor:
         )
         return train_files, val_files
 
-    
+
     def copy_images_and_labels(self, image_files: List[str], yolo_annotations: Dict, split: str):
         """Copy images and create label files for the given split"""
         split_dir = "train" if split == "train" else "val"
@@ -152,35 +157,35 @@ class YOLODataPreprocessor:
             yaml.dump(config, f, default_flow_style=False)
 
         return yaml_path
-    
+
     def preprocess(self, test_size: float = 0.2):
         """Main preprocessing pipeline"""
         print("Starting data preprocessing...")
-        
+
         # Load annotations
         print("Loading annotations...")
         annotations = self.load_annotations()
         print(f"Loaded {len(annotations)} annotations")
-        
+
         # Convert to YOLO format
         print("Converting annotations to YOLO format...")
         yolo_annotations = self.convert_annotations_to_yolo(annotations)
-        
+
         # Get list of image files
         image_files = list(annotations.keys())
         print(f"Found {len(image_files)} images")
-        
+
         # Split data
         print(f"Splitting data (test_size={test_size})...")
         train_files, val_files = self.split_data(image_files, test_size)
         print(f"Training: {len(train_files)} images")
         print(f"Validation: {len(val_files)} images")
-        
+
         # Copy images and create labels
         print("Copying images and creating labels...")
         self.copy_images_and_labels(train_files, yolo_annotations, "train")
         self.copy_images_and_labels(val_files, yolo_annotations, "val")
-        
+
         # Create YAML config
         print("Creating YAML configuration...")
         yaml_path = self.create_yaml_config()
@@ -191,10 +196,11 @@ class YOLODataPreprocessor:
         return yaml_path
 
 def main():
+    """CLI entry point for preparing YOLO training data."""
     # Configuration
     data_dir = "data/dates"
     output_dir = "data/yolo_formatted"
-    
+
     # Create preprocessor and run
     preprocessor = YOLODataPreprocessor(data_dir, output_dir)
     preprocessor.preprocess(test_size=0.2)

@@ -68,3 +68,4 @@ for digit_folder in os.listdir(IMAGE_DIR):
         move_and_label(val_files, 'val', digit_folder_path, class_id)
 
 print("Images and YOLO labels generated for train/val split.")
+ 

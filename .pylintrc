@@ -1,0 +1,11 @@
+[MASTER]
+ignore-patterns=^src/data-processing/.*$
+
+[MESSAGES CONTROL]
+disable=
+    no-member,
+    import-error,
+    invalid-name
+
+[FORMAT]
+max-line-length=120

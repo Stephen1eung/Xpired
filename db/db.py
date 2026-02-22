@@ -3,6 +3,7 @@
 import sqlite3
 from datetime import datetime, timedelta
 import logging
+from typing import Dict, List
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -134,31 +135,32 @@ class XpiredDatabase:
             self.connection.rollback()
             raise
 
-    def add_food_item(
-        self,
-        name: str,
-        *,
-        brand: str = None,
-        category: str = None,
-        barcode: str = None,
-        image_path: str = None,
-        notes: str = None,
-    ) -> int:
+    def add_food_item(self, name: str, details: Dict | None = None, **kwargs) -> int:
         """
         Add a new food item to the database.
 
         Args:
             name (str): Name of the food item
-            brand (str): Brand name (optional)
-            category (str): Food category (optional)
-            barcode (str): Barcode if available (optional)
-            image_path (str): Path to the food item image (optional)
-            notes (str): Additional notes (optional)
+            details (Dict): Optional fields for the food item
+            **kwargs: Optional fields for the food item (backward compatibility)
 
         Returns:
             int: ID of the newly created food item
         """
         cursor = self.connection.cursor()
+
+        if details is None:
+            details = {}
+        details = {
+            **details,
+            **kwargs,
+        }
+
+        brand = details.get("brand")
+        category = details.get("category")
+        barcode = details.get("barcode")
+        image_path = details.get("image_path")
+        notes = details.get("notes")
 
         try:
             cursor.execute('''
@@ -176,7 +178,7 @@ class XpiredDatabase:
             self.connection.rollback()
             raise
 
-    def add_expiration_date(self, food_item_id: int, expiration_date: str, 
+    def add_expiration_date(self, food_item_id: int, expiration_date: str,
                            quantity: int = 1, location: str = 'pantry') -> int:
         """
         Add an expiration date for a food item.
@@ -283,7 +285,7 @@ class XpiredDatabase:
             logger.error("Error getting ingredients: %s", e)
             raise
 
-    def add_notification(self, food_item_id: int, expiration_id: int, 
+    def add_notification(self, food_item_id: int, expiration_id: int,
                         notification_type: str, message: str) -> int:
         """
         Add a notification record.
@@ -408,9 +410,23 @@ if __name__ == "__main__":
         print("Adding sample food items...")
 
         # Add some food items
-        milk_id = db.add_food_item("Milk", brand="Organic Valley", category="Dairy", notes="2% milk")
-        bread_id = db.add_food_item("Whole Wheat Bread", brand="Dave's Killer Bread", category="Bakery")
-        eggs_id = db.add_food_item("Eggs", brand="Happy Eggs", category="Dairy", notes="Free range")
+        milk_id = db.add_food_item(
+            "Milk",
+            brand="Organic Valley",
+            category="Dairy",
+            notes="2% milk",
+        )
+        bread_id = db.add_food_item(
+            "Whole Wheat Bread",
+            brand="Dave's Killer Bread",
+            category="Bakery",
+        )
+        eggs_id = db.add_food_item(
+            "Eggs",
+            brand="Happy Eggs",
+            category="Dairy",
+            notes="Free range",
+        )
 
         # Add expiration dates
         db.add_expiration_date(milk_id, "2024-01-15", quantity=1, location="refrigerator")

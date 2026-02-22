@@ -2,20 +2,20 @@
 YOLO11 Inference Script for Expiration Date Detection
 """
 
-import os
-import sys
 import argparse
+import json
+import sys
 from pathlib import Path
+from typing import Dict, List
+
 import cv2
 import numpy as np
-from PIL import Image
 import torch
 from ultralytics import YOLO
-import json
-from typing import List, Dict, Tuple
 
 class YOLO11Inference:
-    def __init__(self, model_path: str, confidence_threshold: float = 0.5, 
+    """Run inference for a trained YOLO11 model on images."""
+    def __init__(self, model_path: str, *, confidence_threshold: float = 0.5, 
                  iou_threshold: float = 0.45):
         """
         Initialize YOLO11 inference
@@ -48,7 +48,7 @@ class YOLO11Inference:
         
         # Get model metadata
         self.model_info = self.model.info()
-        print(f"Model loaded successfully!")
+        print("Model loaded successfully!")
         print(f"Classes: {self.model_info['names']}")
     
     def get_device(self) -> str:
@@ -84,8 +84,13 @@ class YOLO11Inference:
         
         return image
     
-    def predict_single(self, image_path: str, save_results: bool = False, 
-                      output_dir: str = "inference_results") -> Dict:
+    def predict_single(
+        self,
+        image_path: str,
+        *,
+        save_results: bool = False,
+        output_dir: str = "inference_results",
+    ) -> Dict:
         """
         Run inference on a single image
         
@@ -150,7 +155,7 @@ class YOLO11Inference:
         output_path.mkdir(parents=True, exist_ok=True)
         
         # Process each image
-        all_results = []
+        all_results: List[Dict] = []
         for i, image_file in enumerate(image_files, 1):
             print(f"Processing {i}/{len(image_files)}: {image_file.name}")
             
@@ -161,8 +166,8 @@ class YOLO11Inference:
                     output_dir=output_dir
                 )
                 all_results.append(result)
-            except Exception as e:
-                print(f"Error processing {image_file.name}: {str(e)}")
+            except (OSError, ValueError) as e:
+                print(f"Error processing {image_file.name}: {e}")
                 continue
         
         # Save summary results
@@ -221,8 +226,7 @@ class YOLO11Inference:
             'num_detections': len(detections)
         }
     
-    def save_results(self, image: np.ndarray, result, detections: Dict, 
-                    image_path: str, output_dir: str):
+    def save_results(self, image: np.ndarray, yolo_result, detections: Dict, image_path: str, output_dir: str):
         """
         Save visualization results
         
@@ -261,12 +265,24 @@ class YOLO11Inference:
             label_size = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 2)[0]
             
             # Draw label background
-            cv2.rectangle(vis_image, (x1, y1 - label_size[1] - 10), 
-                         (x1 + label_size[0], y1), color, -1)
+            cv2.rectangle(
+                vis_image,
+                (x1, y1 - label_size[1] - 10),
+                (x1 + label_size[0], y1),
+                color,
+                -1,
+            )
             
             # Draw label text
-            cv2.putText(vis_image, label, (x1, y1 - 5), 
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+            cv2.putText(
+                vis_image,
+                label,
+                (x1, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (255, 255, 255),
+                2,
+            )
         
         # Convert RGB back to BGR for OpenCV saving
         vis_image = cv2.cvtColor(vis_image, cv2.COLOR_RGB2BGR)
@@ -278,7 +294,7 @@ class YOLO11Inference:
         
         # Save detection results as JSON
         json_path = output_path / f"{image_name}_results.json"
-        with open(json_path, 'w') as f:
+        with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(detections, f, indent=2)
     
     def save_batch_results(self, all_results: List[Dict], output_dir: str):
@@ -293,7 +309,7 @@ class YOLO11Inference:
         
         # Save complete results
         results_path = output_path / "batch_results.json"
-        with open(results_path, 'w') as f:
+        with open(results_path, 'w', encoding='utf-8') as f:
             json.dump(all_results, f, indent=2)
         
         # Create summary statistics
@@ -315,17 +331,20 @@ class YOLO11Inference:
         
         # Save summary
         summary_path = output_path / "summary.json"
-        with open(summary_path, 'w') as f:
+        with open(summary_path, 'w', encoding='utf-8') as f:
             json.dump(summary, f, indent=2)
         
-        print(f"\nBatch inference completed!")
+        print("\nBatch inference completed!")
         print(f"Total images processed: {total_images}")
         print(f"Total detections: {total_detections}")
         print(f"Average detections per image: {summary['average_detections_per_image']:.2f}")
         print(f"Results saved to: {output_path}")
 
 def main():
-    parser = argparse.ArgumentParser(description="YOLO11 Inference for Expiration Date Detection")
+    """CLI entry point for running YOLO inference."""
+    parser = argparse.ArgumentParser(
+        description="YOLO11 Inference for Expiration Date Detection"
+    )
     parser.add_argument("--model", type=str, required=True,
                        help="Path to trained model file")
     parser.add_argument("--input", type=str, required=True,
@@ -366,15 +385,15 @@ def main():
         elif input_path.is_dir():
             # Batch inference
             print(f"Running batch inference on directory: {input_path}")
-            all_results = inferencer.predict_batch(str(input_path), args.output)
+            inferencer.predict_batch(str(input_path), args.output)
         
         else:
             raise FileNotFoundError(f"Input path not found: {args.input}")
         
         print(f"\nResults saved to: {args.output}")
         
-    except Exception as e:
-        print(f"Error: {str(e)}")
+    except (OSError, ValueError) as e:
+        print(f"Error: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":

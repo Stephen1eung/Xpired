@@ -32,24 +32,24 @@ class YOLO11Inference:
         self.model_path = Path(model_path)
         self.conf_threshold = confidence_threshold
         self.iou_threshold = iou_threshold
-        
+
         # Class names for expiration date components
         self.class_names = ['day', 'month', 'year']
-        
+
         # Load model
         self.load_model()
-        
+
         # Check device
         self.device = self.get_device()
-    
+
     def load_model(self):
         """Load the trained YOLO11 model."""
         if not self.model_path.exists():
             raise FileNotFoundError(f"Model file not found: {self.model_path}")
-        
+
         print(f"Loading model: {self.model_path}")
         self.model = YOLO(str(self.model_path))
-        
+
         # Get model metadata
         self.model_info = self.model.info()
         print("Model loaded successfully!")
@@ -364,9 +364,9 @@ def main():
                        help="Confidence threshold")
     parser.add_argument("--iou", type=float, default=0.45,
                        help="IoU threshold for NMS")
-    
+
     args = parser.parse_args()
-    
+
     try:
         # Create inference object
         inferencer = YOLO11Inference(
@@ -374,33 +374,33 @@ def main():
             confidence_threshold=args.conf,
             iou_threshold=args.iou
         )
-        
+
         # Check if input is file or directory
         input_path = Path(args.input)
         if input_path.is_file():
             # Single image inference
             print(f"Running inference on single image: {input_path}")
             result = inferencer.predict_single(
-                str(input_path), 
-                save_results=True, 
+                str(input_path),
+                save_results=True,
                 output_dir=args.output
             )
-            
+
             print(f"\nDetection results for {input_path.name}:")
             print(f"Number of detections: {result['num_detections']}")
             for detection in result['detections']:
                 print(f"  {detection['class']}: {detection['confidence']:.3f}")
-        
+
         elif input_path.is_dir():
             # Batch inference
             print(f"Running batch inference on directory: {input_path}")
             inferencer.predict_batch(str(input_path), args.output)
-        
+
         else:
             raise FileNotFoundError(f"Input path not found: {args.input}")
-        
+
         print(f"\nResults saved to: {args.output}")
-        
+
     except (OSError, ValueError) as e:
         print(f"Error: {e}")
         sys.exit(1)

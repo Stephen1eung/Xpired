@@ -112,6 +112,7 @@ class YOLODataPreprocessor:
     def split_data(
         self, image_files: List[str], test_size: float = 0.2, random_state: int = 42
     ) -> Tuple[List[str], List[str]]:
+        """Split image filenames into train and validation lists."""
         train_files, val_files = train_test_split(
             image_files, test_size=test_size, random_state=random_state
         )
@@ -141,7 +142,7 @@ class YOLODataPreprocessor:
             with open(dst_label_path, 'w', encoding='utf-8') as f:
                 for label in labels:
                     f.write(label + '\n')
-    
+
     def create_yaml_config(self):
         """Create YAML configuration file for YOLO training"""
         config = {

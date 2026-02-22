@@ -457,7 +457,6 @@ if __name__ == "__main__":
                 f"Earliest expiration: {item['earliest_expiration']})"
             )
 
-        print("\nDatabase setup completed successfully!")
 
     except (sqlite3.Error, ValueError) as e:
         print(f"Error during database operations: {e}")

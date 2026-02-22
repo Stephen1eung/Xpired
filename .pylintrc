@@ -1,11 +1,15 @@
 [MASTER]
-ignore-patterns=^src/data-processing/.*$
+ignore-patterns=(^src[\\/]data-processing[\\/].*$)|(^src[\\/]data-processing[\\/]train-val-split\.py$)
+ignore-paths=src[\\/]data-processing
 
 [MESSAGES CONTROL]
 disable=
+    duplicate-code,
     no-member,
     import-error,
-    invalid-name
+    invalid-name,
+    too-many-locals,
+    missing-final-newline
 
 [FORMAT]
-max-line-length=120
+max-line-length=100
